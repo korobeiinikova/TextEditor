@@ -1,5 +1,8 @@
 using System.IO;
 using System.Windows.Forms;
+using System;
+using System.Numerics;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace TextEditor
 {
@@ -135,6 +138,7 @@ namespace TextEditor
             {
                 richTextBox1.Undo();
             }
+            открытьToolStripMenuItem_Click(sender, e);
         }
         private void удалитьToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -215,6 +219,225 @@ namespace TextEditor
                 "\r\n\r\nЯзык программирования: C# \r\nПлатформа: Windows Forms  \r\n\r\nАвтор:\r\nСтудент(ка) группы АП-326\r\n" +
                 "Коробейникова Дарья Романовна\r\n\r\nГод разработки: 2026";
             MessageBox.Show(TextInfo, "О программе");
+        }
+
+        private class Lexer
+        {
+            private string text;
+            private string token_name;
+            private string before_token;
+            private List<string> texts = new List<string>();
+            private string row;
+            private List<Token> tokens = new List<Token>();
+            public Lexer(string t)
+            {
+                text = t;
+            }
+            private void AddToken(int code, string type, string value, int row, int start, int end)
+            {
+                Token_Location location = new Token_Location
+                {
+                    row = row,
+                    start = start,
+                    end = end
+                };
+                tokens.Add(new Token(code, type, value, location));
+            }
+            public List<Token> analyze()
+            {
+                foreach(char i in text)
+                {
+                    if(i != '\n')
+                    {
+                        row += i;
+                    }
+                    else
+                    {
+                        texts.Add(row);
+                        row = "";
+                    }
+                }
+                if(!string.IsNullOrEmpty(row)) texts.Add(row);
+                for (int number_row = 1; number_row <= texts.Count; number_row++)
+                {
+                    int col = 0;
+                    int tokenStart = -1;
+                    for (int i = 0; i < texts[number_row - 1].Length; i++)
+                    {
+                        char c = texts[number_row - 1][i];
+                        col = i + 1;
+                        if (c != ' ')
+                        {
+                            if (c == '-' || c == '+' || c == '=')
+                            {
+                                if (string.IsNullOrEmpty(token_name))
+                                {
+                                    tokenStart = col;
+                                    token_name += c;
+                                }
+                                else AddToken(5, "operator", c.ToString(), number_row, col, col);
+                            }
+                            else if(c == ';')
+                            {
+                                if (string.IsNullOrEmpty(token_name))
+                                {
+                                    tokenStart = col;
+                                    token_name += c;
+                                }
+                                else AddToken(6, "separator", c.ToString(), number_row, col, col);
+                            }
+                            else
+                            {
+                                if (string.IsNullOrEmpty(token_name))
+                                {
+                                    tokenStart = col;
+                                }
+                                token_name += c;
+                                continue;
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(token_name))
+                        {
+                            if (token_name.Length == 1)
+                            {
+                                if (int.TryParse(token_name, out int result_parse))
+                                {
+                                    AddToken(1, "digit", token_name, number_row, tokenStart, col - 1);
+                                    token_name = "";
+                                    tokenStart = -1;
+                                    if (c == ' ') continue;
+                                }
+                                else if (Char.IsLetter(token_name[0]))
+                                {
+                                    AddToken(4, "identifier", token_name, number_row, tokenStart, col - 1);
+                                    token_name = "";
+                                    tokenStart = -1;
+                                    if (c == ' ') continue;
+                                }
+                                else
+                                {
+                                    switch (token_name)
+                                    {
+                                        case "+" or "-" or "=":
+                                            AddToken(5, "operator", token_name, number_row, tokenStart, col);
+                                            before_token = token_name;
+                                            token_name = "";
+                                            tokenStart = -1;
+                                            continue;
+                                        case ";":
+                                            AddToken(6, "separator", token_name, number_row, tokenStart, col);
+                                            before_token = token_name;
+                                            token_name = "";
+                                            tokenStart = -1;
+                                            continue;
+                                        default:
+                                            AddToken(7, "error", token_name, number_row, tokenStart, col);
+                                            before_token = token_name;
+                                            token_name = "";
+                                            tokenStart = -1;
+                                            continue;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                if (int.TryParse(token_name, out int result_parse))
+                                {
+                                    AddToken(1, "digit", token_name, number_row, tokenStart, col - 1);
+                                    token_name = "";
+                                    tokenStart = -1;
+                                    if (c == ' ') continue;
+                                }
+                                else
+                                {
+                                    if (token_name == "int" || token_name == "final")
+                                    {
+                                        AddToken(3, "keyword", token_name, number_row, tokenStart, col - 1);
+                                        token_name = "";
+                                        tokenStart = -1;
+                                        if (c == ' ') continue;
+                                    }
+                                    else
+                                    {
+                                        if (Char.IsDigit(token_name[0]) || (token_name[0] != '_' && !Char.IsLetter(token_name[0])))
+                                        {
+                                            AddToken(7, "error", token_name, number_row, tokenStart, col - 1);
+                                            token_name = "";
+                                            tokenStart = -1;
+                                            if (c == ' ') continue;
+                                        }
+                                        else
+                                        {
+                                            AddToken(4, "identifier", token_name, number_row, tokenStart, col - 1);
+                                            token_name = "";
+                                            tokenStart = -1;
+                                            if (c == ' ') continue;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else if(c == ' ')
+                        {
+                            if (!string.IsNullOrEmpty(before_token))
+                            {
+                                before_token = "";
+                                continue;
+                            }
+                            AddToken(8, "whitespace", "whitespace", number_row, col, col);
+                        }
+                        else
+                        {
+                            if (int.TryParse(c.ToString(), out int result_parse))
+                            {
+                                AddToken(1, "digit", c.ToString(), number_row, col, col);
+                                continue;
+                            }
+                            else if(c != '-' && c != '+' && c != '=' && c != ';')
+                            {
+                                AddToken(7, "error", c.ToString(), number_row, col, col);
+                                continue;
+                            }
+                        }
+                    }
+                }
+                return tokens;
+            }
+        }
+        private class Token
+        {
+            public int code;
+            public string type;
+            public string token_name;
+            public Token_Location location;
+            public Token(int T_Code, string T_Type, string T_Token, Token_Location T_Location)
+            {
+                code = T_Code;
+                type = T_Type;
+                token_name = T_Token;
+                location = T_Location;
+            }
+        }
+        private struct Token_Location
+        {
+            public int row;
+            public int start;
+            public int end;
+            public string To_String()
+            {
+                return $"{row} строка, {start}-{end}";
+            }
+        }
+        private void пускToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            dataGridView1.Rows.Clear();
+            List<Token> tokens;
+            Lexer lexer = new Lexer(richTextBox1.Text);
+            tokens = lexer.analyze();
+            foreach (Token token in tokens )
+            {
+                dataGridView1.Rows.Add(token.code, token.type, token.token_name, token.location.To_String());
+            }
         }
     }
 }

@@ -72,6 +72,10 @@
             toolStripButton11 = new ToolStripButton();
             richTextBox1 = new RichTextBox();
             dataGridView1 = new DataGridView();
+            ColumnCode = new DataGridViewTextBoxColumn();
+            ColumnType = new DataGridViewTextBoxColumn();
+            ColumnToken = new DataGridViewTextBoxColumn();
+            ColumnLocation = new DataGridViewTextBoxColumn();
             splitContainer1 = new SplitContainer();
             menuStrip1.SuspendLayout();
             toolStrip1.SuspendLayout();
@@ -248,6 +252,7 @@
             пускToolStripMenuItem.Name = "пускToolStripMenuItem";
             пускToolStripMenuItem.Size = new Size(103, 45);
             пускToolStripMenuItem.Text = "Пуск";
+            пускToolStripMenuItem.Click += пускToolStripMenuItem_Click;
             // 
             // справкаToolStripMenuItem
             // 
@@ -278,7 +283,7 @@
             toolStrip1.Items.AddRange(new ToolStripItem[] { toolStripButton1, toolStripButton2, toolStripButton3, toolStripButton4, toolStripButton5, toolStripButton6, toolStripButton7, toolStripButton8, toolStripButton9, toolStripButton10, toolStripButton11 });
             toolStrip1.Location = new Point(5, 49);
             toolStrip1.Name = "toolStrip1";
-            toolStrip1.Size = new Size(1473, 45);
+            toolStrip1.Size = new Size(1473, 48);
             toolStrip1.TabIndex = 1;
             toolStrip1.Text = "toolStrip1";
             // 
@@ -289,7 +294,7 @@
             toolStripButton1.Image = (Image)resources.GetObject("toolStripButton1.Image");
             toolStripButton1.ImageTransparentColor = Color.Magenta;
             toolStripButton1.Name = "toolStripButton1";
-            toolStripButton1.Size = new Size(46, 39);
+            toolStripButton1.Size = new Size(46, 42);
             toolStripButton1.Text = "Создать документ";
             toolStripButton1.Click += создатьToolStripMenuItem_Click;
             // 
@@ -300,7 +305,7 @@
             toolStripButton2.Image = (Image)resources.GetObject("toolStripButton2.Image");
             toolStripButton2.ImageTransparentColor = Color.Magenta;
             toolStripButton2.Name = "toolStripButton2";
-            toolStripButton2.Size = new Size(46, 39);
+            toolStripButton2.Size = new Size(46, 42);
             toolStripButton2.Text = "Открыть документ";
             toolStripButton2.Click += открытьToolStripMenuItem_Click;
             // 
@@ -310,7 +315,7 @@
             toolStripButton3.Image = (Image)resources.GetObject("toolStripButton3.Image");
             toolStripButton3.ImageTransparentColor = Color.Magenta;
             toolStripButton3.Name = "toolStripButton3";
-            toolStripButton3.Size = new Size(46, 39);
+            toolStripButton3.Size = new Size(46, 42);
             toolStripButton3.Text = "Сохранить";
             toolStripButton3.Click += сохранитьToolStripMenuItem_Click;
             // 
@@ -320,7 +325,7 @@
             toolStripButton4.Image = (Image)resources.GetObject("toolStripButton4.Image");
             toolStripButton4.ImageTransparentColor = Color.Magenta;
             toolStripButton4.Name = "toolStripButton4";
-            toolStripButton4.Size = new Size(46, 39);
+            toolStripButton4.Size = new Size(46, 42);
             toolStripButton4.Text = "Вернуть";
             toolStripButton4.Click += отменитьToolStripMenuItem_Click;
             // 
@@ -330,7 +335,7 @@
             toolStripButton5.Image = (Image)resources.GetObject("toolStripButton5.Image");
             toolStripButton5.ImageTransparentColor = Color.Magenta;
             toolStripButton5.Name = "toolStripButton5";
-            toolStripButton5.Size = new Size(46, 39);
+            toolStripButton5.Size = new Size(46, 42);
             toolStripButton5.Text = "Повторить";
             toolStripButton5.Click += повторитьToolStripMenuItem_Click;
             // 
@@ -340,7 +345,7 @@
             toolStripButton6.Image = (Image)resources.GetObject("toolStripButton6.Image");
             toolStripButton6.ImageTransparentColor = Color.Magenta;
             toolStripButton6.Name = "toolStripButton6";
-            toolStripButton6.Size = new Size(46, 39);
+            toolStripButton6.Size = new Size(46, 42);
             toolStripButton6.Text = "Копировать";
             toolStripButton6.Click += копироватьToolStripMenuItem_Click;
             // 
@@ -350,7 +355,7 @@
             toolStripButton7.Image = (Image)resources.GetObject("toolStripButton7.Image");
             toolStripButton7.ImageTransparentColor = Color.Magenta;
             toolStripButton7.Name = "toolStripButton7";
-            toolStripButton7.Size = new Size(46, 39);
+            toolStripButton7.Size = new Size(46, 42);
             toolStripButton7.Text = "Вырезать";
             toolStripButton7.Click += вырезатьToolStripMenuItem_Click;
             // 
@@ -360,7 +365,7 @@
             toolStripButton8.Image = (Image)resources.GetObject("toolStripButton8.Image");
             toolStripButton8.ImageTransparentColor = Color.Magenta;
             toolStripButton8.Name = "toolStripButton8";
-            toolStripButton8.Size = new Size(46, 39);
+            toolStripButton8.Size = new Size(46, 42);
             toolStripButton8.Text = "Вставить";
             toolStripButton8.Click += вставитьToolStripMenuItem_Click;
             // 
@@ -370,7 +375,7 @@
             toolStripButton9.Image = (Image)resources.GetObject("toolStripButton9.Image");
             toolStripButton9.ImageTransparentColor = Color.Magenta;
             toolStripButton9.Name = "toolStripButton9";
-            toolStripButton9.Size = new Size(46, 39);
+            toolStripButton9.Size = new Size(46, 42);
             toolStripButton9.Text = "Запустить";
             // 
             // toolStripButton10
@@ -379,7 +384,7 @@
             toolStripButton10.Image = (Image)resources.GetObject("toolStripButton10.Image");
             toolStripButton10.ImageTransparentColor = Color.Magenta;
             toolStripButton10.Name = "toolStripButton10";
-            toolStripButton10.Size = new Size(46, 39);
+            toolStripButton10.Size = new Size(46, 42);
             toolStripButton10.Text = "Справка";
             toolStripButton10.Click += вызовСправкиToolStripMenuItem_Click;
             // 
@@ -389,7 +394,7 @@
             toolStripButton11.Image = (Image)resources.GetObject("toolStripButton11.Image");
             toolStripButton11.ImageTransparentColor = Color.Magenta;
             toolStripButton11.Name = "toolStripButton11";
-            toolStripButton11.Size = new Size(46, 39);
+            toolStripButton11.Size = new Size(46, 42);
             toolStripButton11.Text = "О программе";
             toolStripButton11.Click += оПрограммеToolStripMenuItem_Click;
             // 
@@ -398,12 +403,15 @@
             richTextBox1.Dock = DockStyle.Fill;
             richTextBox1.Location = new Point(0, 0);
             richTextBox1.Name = "richTextBox1";
-            richTextBox1.Size = new Size(1473, 418);
+            richTextBox1.Size = new Size(1473, 416);
             richTextBox1.TabIndex = 2;
             richTextBox1.Text = "";
             // 
             // dataGridView1
             // 
+            dataGridView1.AllowUserToAddRows = false;
+            dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridView1.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
             dataGridView1.BackgroundColor = SystemColors.ButtonHighlight;
             dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle1.BackColor = SystemColors.Control;
@@ -414,6 +422,7 @@
             dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
             dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.Columns.AddRange(new DataGridViewColumn[] { ColumnCode, ColumnType, ColumnToken, ColumnLocation });
             dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle2.BackColor = SystemColors.Window;
             dataGridViewCellStyle2.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
@@ -428,13 +437,41 @@
             dataGridView1.ReadOnly = true;
             dataGridView1.RowHeadersWidth = 82;
             dataGridView1.RowTemplate.Height = 41;
-            dataGridView1.Size = new Size(1473, 421);
+            dataGridView1.Size = new Size(1473, 420);
             dataGridView1.TabIndex = 4;
+            // 
+            // ColumnCode
+            // 
+            ColumnCode.HeaderText = "Code";
+            ColumnCode.MinimumWidth = 10;
+            ColumnCode.Name = "ColumnCode";
+            ColumnCode.ReadOnly = true;
+            // 
+            // ColumnType
+            // 
+            ColumnType.HeaderText = "Type";
+            ColumnType.MinimumWidth = 10;
+            ColumnType.Name = "ColumnType";
+            ColumnType.ReadOnly = true;
+            // 
+            // ColumnToken
+            // 
+            ColumnToken.HeaderText = "Token";
+            ColumnToken.MinimumWidth = 10;
+            ColumnToken.Name = "ColumnToken";
+            ColumnToken.ReadOnly = true;
+            // 
+            // ColumnLocation
+            // 
+            ColumnLocation.HeaderText = "Location";
+            ColumnLocation.MinimumWidth = 10;
+            ColumnLocation.Name = "ColumnLocation";
+            ColumnLocation.ReadOnly = true;
             // 
             // splitContainer1
             // 
             splitContainer1.Dock = DockStyle.Fill;
-            splitContainer1.Location = new Point(5, 94);
+            splitContainer1.Location = new Point(5, 97);
             splitContainer1.Name = "splitContainer1";
             splitContainer1.Orientation = Orientation.Horizontal;
             // 
@@ -445,8 +482,8 @@
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(dataGridView1);
-            splitContainer1.Size = new Size(1473, 843);
-            splitContainer1.SplitterDistance = 418;
+            splitContainer1.Size = new Size(1473, 840);
+            splitContainer1.SplitterDistance = 416;
             splitContainer1.TabIndex = 5;
             // 
             // Form1
@@ -520,5 +557,9 @@
         private RichTextBox richTextBox1;
         private DataGridView dataGridView1;
         private SplitContainer splitContainer1;
+        private DataGridViewTextBoxColumn ColumnCode;
+        private DataGridViewTextBoxColumn ColumnType;
+        private DataGridViewTextBoxColumn ColumnToken;
+        private DataGridViewTextBoxColumn ColumnLocation;
     }
 }
