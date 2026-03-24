@@ -225,7 +225,7 @@ namespace TextEditor
         {
             private string text;
             private string token_name;
-            private string before_token;
+            private Token before_token = new Token();
             private List<string> texts = new List<string>();
             private string row;
             private List<Token> tokens = new List<Token>();
@@ -243,164 +243,97 @@ namespace TextEditor
                 };
                 tokens.Add(new Token(code, type, value, location));
             }
+            private void FinishToken(int row, int endCol)
+            {
+                if (string.IsNullOrEmpty(token_name)) return;
+
+                if (int.TryParse(token_name, out _))
+                {
+                    AddToken(1, "digit", token_name, row, endCol - token_name.Length + 1, endCol);
+                }
+                else if (token_name == "int" || token_name == "final")
+                {
+                    AddToken(3, "keyword", token_name, row, endCol - token_name.Length + 1, endCol);
+                }
+                else
+                {
+                    int start = endCol - token_name.Length + 1;
+                    int i = 0;
+
+                    while (i < token_name.Length)
+                    {
+                        int partStart = i;
+                        bool isLetter = char.IsLetter(token_name[i]);
+
+                        while (i < token_name.Length && char.IsLetter(token_name[i]) == isLetter)
+                            i++;
+
+                        string part = token_name.Substring(partStart, i - partStart);
+                        int partStartCol = start + partStart;
+                        int partEndCol = partStartCol + part.Length - 1;
+
+                        if (isLetter)
+                        {
+                            AddToken(4, "identifier", part, row, partStartCol, partEndCol);
+                        }
+                        else
+                        {
+                            AddToken(7, "error", part, row, partStartCol, partEndCol);
+                        }
+                    }
+                }
+
+                token_name = "";
+            }
             public List<Token> analyze()
             {
-                foreach(char i in text)
+                foreach (char c in text)
                 {
-                    if(i != '\n')
-                    {
-                        row += i;
-                    }
+                    if (c != '\n') row += c;
                     else
                     {
                         texts.Add(row);
                         row = "";
                     }
                 }
-                if(!string.IsNullOrEmpty(row)) texts.Add(row);
+                if (!string.IsNullOrEmpty(row)) texts.Add(row);
+
                 for (int number_row = 1; number_row <= texts.Count; number_row++)
                 {
-                    int col = 0;
                     int tokenStart = -1;
-                    for (int i = 0; i < texts[number_row - 1].Length; i++)
+                    string line = texts[number_row - 1];
+
+                    for (int i = 0; i < line.Length; i++)
                     {
-                        char c = texts[number_row - 1][i];
-                        col = i + 1;
-                        if (c != ' ')
+                        char c = line[i];
+                        int col = i + 1;
+
+                        if (c == ' ')
                         {
-                            if (c == '-' || c == '+' || c == '=')
-                            {
-                                if (string.IsNullOrEmpty(token_name))
-                                {
-                                    tokenStart = col;
-                                    token_name += c;
-                                }
-                                else AddToken(5, "operator", c.ToString(), number_row, col, col);
-                            }
-                            else if(c == ';')
-                            {
-                                if (string.IsNullOrEmpty(token_name))
-                                {
-                                    tokenStart = col;
-                                    token_name += c;
-                                }
-                                else AddToken(6, "separator", c.ToString(), number_row, col, col);
-                            }
-                            else
-                            {
-                                if (string.IsNullOrEmpty(token_name))
-                                {
-                                    tokenStart = col;
-                                }
-                                token_name += c;
-                                continue;
-                            }
+                            FinishToken(number_row, col - 1);
+                            AddToken(8, "whitespace", " ", number_row, col, col);
+                            continue;
                         }
-                        if (!string.IsNullOrEmpty(token_name))
+                        if (c == '+' || c == '-' || c == '=')
                         {
-                            if (token_name.Length == 1)
-                            {
-                                if (int.TryParse(token_name, out int result_parse))
-                                {
-                                    AddToken(1, "digit", token_name, number_row, tokenStart, col - 1);
-                                    token_name = "";
-                                    tokenStart = -1;
-                                    if (c == ' ') continue;
-                                }
-                                else if (Char.IsLetter(token_name[0]))
-                                {
-                                    AddToken(4, "identifier", token_name, number_row, tokenStart, col - 1);
-                                    token_name = "";
-                                    tokenStart = -1;
-                                    if (c == ' ') continue;
-                                }
-                                else
-                                {
-                                    switch (token_name)
-                                    {
-                                        case "+" or "-" or "=":
-                                            AddToken(5, "operator", token_name, number_row, tokenStart, col);
-                                            before_token = token_name;
-                                            token_name = "";
-                                            tokenStart = -1;
-                                            continue;
-                                        case ";":
-                                            AddToken(6, "separator", token_name, number_row, tokenStart, col);
-                                            before_token = token_name;
-                                            token_name = "";
-                                            tokenStart = -1;
-                                            continue;
-                                        default:
-                                            AddToken(7, "error", token_name, number_row, tokenStart, col);
-                                            before_token = token_name;
-                                            token_name = "";
-                                            tokenStart = -1;
-                                            continue;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (int.TryParse(token_name, out int result_parse))
-                                {
-                                    AddToken(1, "digit", token_name, number_row, tokenStart, col - 1);
-                                    token_name = "";
-                                    tokenStart = -1;
-                                    if (c == ' ') continue;
-                                }
-                                else
-                                {
-                                    if (token_name == "int" || token_name == "final")
-                                    {
-                                        AddToken(3, "keyword", token_name, number_row, tokenStart, col - 1);
-                                        token_name = "";
-                                        tokenStart = -1;
-                                        if (c == ' ') continue;
-                                    }
-                                    else
-                                    {
-                                        if (Char.IsDigit(token_name[0]) || (token_name[0] != '_' && !Char.IsLetter(token_name[0])))
-                                        {
-                                            AddToken(7, "error", token_name, number_row, tokenStart, col - 1);
-                                            token_name = "";
-                                            tokenStart = -1;
-                                            if (c == ' ') continue;
-                                        }
-                                        else
-                                        {
-                                            AddToken(4, "identifier", token_name, number_row, tokenStart, col - 1);
-                                            token_name = "";
-                                            tokenStart = -1;
-                                            if (c == ' ') continue;
-                                        }
-                                    }
-                                }
-                            }
+                            FinishToken(number_row, col - 1);
+                            AddToken(5, "operator", c.ToString(), number_row, col, col);
+                            continue;
                         }
-                        else if(c == ' ')
+                        if (c == ';')
                         {
-                            if (!string.IsNullOrEmpty(before_token))
-                            {
-                                before_token = "";
-                                continue;
-                            }
-                            AddToken(8, "whitespace", "whitespace", number_row, col, col);
+                            FinishToken(number_row, col - 1);
+                            AddToken(6, "separator", ";", number_row, col, col);
+                            continue;
                         }
-                        else
-                        {
-                            if (int.TryParse(c.ToString(), out int result_parse))
-                            {
-                                AddToken(1, "digit", c.ToString(), number_row, col, col);
-                                continue;
-                            }
-                            else if(c != '-' && c != '+' && c != '=' && c != ';')
-                            {
-                                AddToken(7, "error", c.ToString(), number_row, col, col);
-                                continue;
-                            }
-                        }
+                        if (string.IsNullOrEmpty(token_name))
+                            tokenStart = col;
+
+                        token_name += c;
                     }
+                    FinishToken(number_row, line.Length);
                 }
+
                 return tokens;
             }
         }
@@ -416,6 +349,13 @@ namespace TextEditor
                 type = T_Type;
                 token_name = T_Token;
                 location = T_Location;
+            }
+            public Token()
+            {
+                code = 0;
+                type = "no";
+                token_name = "no";
+                location = new Token_Location();
             }
         }
         private struct Token_Location
@@ -434,7 +374,7 @@ namespace TextEditor
             List<Token> tokens;
             Lexer lexer = new Lexer(richTextBox1.Text);
             tokens = lexer.analyze();
-            foreach (Token token in tokens )
+            foreach (Token token in tokens)
             {
                 dataGridView1.Rows.Add(token.code, token.type, token.token_name, token.location.To_String());
             }

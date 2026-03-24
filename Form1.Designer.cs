@@ -377,6 +377,7 @@
             toolStripButton9.Name = "toolStripButton9";
             toolStripButton9.Size = new Size(46, 42);
             toolStripButton9.Text = "Запустить";
+            toolStripButton9.Click += пускToolStripMenuItem_Click;
             // 
             // toolStripButton10
             // 
