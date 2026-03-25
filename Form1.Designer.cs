@@ -76,14 +76,25 @@
             ColumnType = new DataGridViewTextBoxColumn();
             ColumnToken = new DataGridViewTextBoxColumn();
             ColumnLocation = new DataGridViewTextBoxColumn();
+            dataGridView2 = new DataGridView();
+            Column1 = new DataGridViewTextBoxColumn();
+            Column2 = new DataGridViewTextBoxColumn();
+            Column3 = new DataGridViewTextBoxColumn();
             splitContainer1 = new SplitContainer();
+            tabControl1 = new TabControl();
+            tabPage1 = new TabPage();
+            tabPage2 = new TabPage();
             menuStrip1.SuspendLayout();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dataGridView2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
             splitContainer1.SuspendLayout();
+            tabControl1.SuspendLayout();
+            tabPage1.SuspendLayout();
+            tabPage2.SuspendLayout();
             SuspendLayout();
             // 
             // menuStrip1
@@ -433,13 +444,14 @@
             dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
             dataGridView1.DefaultCellStyle = dataGridViewCellStyle2;
             dataGridView1.Dock = DockStyle.Fill;
-            dataGridView1.Location = new Point(0, 0);
+            dataGridView1.Location = new Point(3, 3);
             dataGridView1.Name = "dataGridView1";
             dataGridView1.ReadOnly = true;
             dataGridView1.RowHeadersWidth = 82;
             dataGridView1.RowTemplate.Height = 41;
-            dataGridView1.Size = new Size(1473, 420);
+            dataGridView1.Size = new Size(1448, 354);
             dataGridView1.TabIndex = 4;
+            dataGridView1.CellClick += dataGridView1_CellClick;
             // 
             // ColumnCode
             // 
@@ -469,6 +481,47 @@
             ColumnLocation.Name = "ColumnLocation";
             ColumnLocation.ReadOnly = true;
             // 
+            // dataGridView2
+            // 
+            dataGridView2.AllowUserToAddRows = false;
+            dataGridView2.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridView2.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            dataGridView2.BackgroundColor = SystemColors.ButtonHighlight;
+            dataGridView2.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridView2.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView2.Columns.AddRange(new DataGridViewColumn[] { Column1, Column2, Column3 });
+            dataGridView2.DefaultCellStyle = dataGridViewCellStyle2;
+            dataGridView2.Dock = DockStyle.Fill;
+            dataGridView2.Location = new Point(3, 3);
+            dataGridView2.Name = "dataGridView2";
+            dataGridView2.ReadOnly = true;
+            dataGridView2.RowHeadersWidth = 82;
+            dataGridView2.RowTemplate.Height = 41;
+            dataGridView2.Size = new Size(1448, 354);
+            dataGridView2.TabIndex = 4;
+            dataGridView2.CellClick += dataGridView2_CellClick;
+            // 
+            // Column1
+            // 
+            Column1.HeaderText = "Неверный фрагмент ";
+            Column1.MinimumWidth = 10;
+            Column1.Name = "Column1";
+            Column1.ReadOnly = true;
+            // 
+            // Column2
+            // 
+            Column2.HeaderText = "Местоположение";
+            Column2.MinimumWidth = 10;
+            Column2.Name = "Column2";
+            Column2.ReadOnly = true;
+            // 
+            // Column3
+            // 
+            Column3.HeaderText = "Описание";
+            Column3.MinimumWidth = 10;
+            Column3.Name = "Column3";
+            Column3.ReadOnly = true;
+            // 
             // splitContainer1
             // 
             splitContainer1.Dock = DockStyle.Fill;
@@ -482,10 +535,43 @@
             // 
             // splitContainer1.Panel2
             // 
-            splitContainer1.Panel2.Controls.Add(dataGridView1);
+            splitContainer1.Panel2.Controls.Add(tabControl1);
             splitContainer1.Size = new Size(1473, 840);
             splitContainer1.SplitterDistance = 416;
             splitContainer1.TabIndex = 5;
+            // 
+            // tabControl1
+            // 
+            tabControl1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tabControl1.Controls.Add(tabPage1);
+            tabControl1.Controls.Add(tabPage2);
+            tabControl1.Location = new Point(3, 3);
+            tabControl1.Name = "tabControl1";
+            tabControl1.SelectedIndex = 0;
+            tabControl1.Size = new Size(1470, 414);
+            tabControl1.TabIndex = 5;
+            // 
+            // tabPage1
+            // 
+            tabPage1.Controls.Add(dataGridView1);
+            tabPage1.Location = new Point(8, 46);
+            tabPage1.Name = "tabPage1";
+            tabPage1.Padding = new Padding(3);
+            tabPage1.Size = new Size(1454, 360);
+            tabPage1.TabIndex = 0;
+            tabPage1.Text = "tabPage1";
+            tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // tabPage2
+            // 
+            tabPage2.Controls.Add(dataGridView2);
+            tabPage2.Location = new Point(8, 46);
+            tabPage2.Name = "tabPage2";
+            tabPage2.Padding = new Padding(3);
+            tabPage2.Size = new Size(1454, 360);
+            tabPage2.TabIndex = 1;
+            tabPage2.Text = "tabPage2";
+            tabPage2.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
@@ -506,10 +592,14 @@
             toolStrip1.ResumeLayout(false);
             toolStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dataGridView2).EndInit();
             splitContainer1.Panel1.ResumeLayout(false);
             splitContainer1.Panel2.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)splitContainer1).EndInit();
             splitContainer1.ResumeLayout(false);
+            tabControl1.ResumeLayout(false);
+            tabPage1.ResumeLayout(false);
+            tabPage2.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -557,10 +647,17 @@
         private ToolStripButton toolStripButton11;
         private RichTextBox richTextBox1;
         private DataGridView dataGridView1;
+        private DataGridView dataGridView2;
         private SplitContainer splitContainer1;
         private DataGridViewTextBoxColumn ColumnCode;
         private DataGridViewTextBoxColumn ColumnType;
         private DataGridViewTextBoxColumn ColumnToken;
         private DataGridViewTextBoxColumn ColumnLocation;
+        private TabControl tabControl1;
+        private TabPage tabPage1;
+        private TabPage tabPage2;
+        private DataGridViewTextBoxColumn Column1;
+        private DataGridViewTextBoxColumn Column2;
+        private DataGridViewTextBoxColumn Column3;
     }
 }

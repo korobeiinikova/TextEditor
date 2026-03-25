@@ -3,6 +3,7 @@ using System.Windows.Forms;
 using System;
 using System.Numerics;
 using static System.Net.Mime.MediaTypeNames;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace TextEditor
 {
@@ -17,6 +18,7 @@ namespace TextEditor
 
             richTextBox1.TextChanged += richTextBox1_TextChanged;
             FormClosing += new FormClosingEventHandler(Form1_FormClosing);
+
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -368,16 +370,254 @@ namespace TextEditor
                 return $"{row} строка, {start}-{end}";
             }
         }
-        private void пускToolStripMenuItem_Click(object sender, EventArgs e)
+        public void пускToolStripMenuItem_Click(object sender, EventArgs e)
         {
             dataGridView1.Rows.Clear();
-            List<Token> tokens;
+            dataGridView2.Rows.Clear();
+
             Lexer lexer = new Lexer(richTextBox1.Text);
-            tokens = lexer.analyze();
+            List<Token> tokens = lexer.analyze();
+
             foreach (Token token in tokens)
             {
-                dataGridView1.Rows.Add(token.code, token.type, token.token_name, token.location.To_String());
+                dataGridView1.Rows.Add(
+                    token.code,
+                    token.type,
+                    token.token_name,
+                    token.location.To_String()
+                );
+            }
+
+            Parser parser = new Parser(tokens);
+            parser.Parse();
+            dataGridView2.Rows.Add($"Общее количество ошибок: {parser.Errors.Count}");
+            foreach (SyntaxError error in parser.Errors)
+            {
+                string fragment = error.Token?.token_name ?? "EOF";
+                string location = error.Token != null
+                    ? $"{error.Token.location.row} строка, позиция {error.Token.location.start}"
+                    : "—";
+
+                dataGridView2.Rows.Add(
+                    fragment,
+                    location,
+                    error.Message
+                );
+            }
+            
+            if(parser.Errors.Count != 0) tabControl1.SelectedTab = tabPage2;
+        }
+        private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+            string locationText = dataGridView1.Rows[e.RowIndex].Cells[3].Value?.ToString();
+            string fragment = dataGridView1.Rows[e.RowIndex].Cells[2].Value?.ToString();
+
+            if (string.IsNullOrEmpty(locationText)) return;
+
+            var parts = locationText
+                .Replace("строка", "")
+                .Split(',');
+
+            if (parts.Length < 2) return;
+
+            int row = int.Parse(parts[0].Trim());
+
+            var positions = parts[1].Trim().Split('-');
+            int start = int.Parse(positions[0]);
+            int end = int.Parse(positions[1]);
+
+            int index = GetIndexFromRowCol(row, start);
+            int length = end - start + 1;
+
+            richTextBox1.SelectionStart = index;
+            richTextBox1.SelectionLength = length;
+            richTextBox1.Focus();
+        }
+        private void dataGridView2_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex <= 0) return;
+
+            string locationText = dataGridView2.Rows[e.RowIndex].Cells[1].Value.ToString();
+            string fragment = dataGridView2.Rows[e.RowIndex].Cells[0].Value.ToString();
+
+            var parts = locationText
+                .Replace("строка", "")
+                .Replace("позиция", "")
+                .Split(',');
+
+            int row = int.Parse(parts[0]);
+            int col = int.Parse(parts[1]);
+
+            int index = GetIndexFromRowCol(row, col);
+            richTextBox1.SelectionStart = index;
+            richTextBox1.SelectionLength = fragment.Length;
+            richTextBox1.Focus();
+        }
+        private int GetIndexFromRowCol(int row, int col)
+        {
+            int index = 0;
+            int currentRow = 1;
+
+            foreach (char c in richTextBox1.Text)
+            {
+                if (currentRow == row)
+                    break;
+
+                index++;
+                if (c == '\n')
+                    currentRow++;
+            }
+
+            return index + col - 1;
+        }
+        class SyntaxError
+        {
+            public string Message;
+            public Token Token;
+
+            public SyntaxError(string message, Token token)
+            {
+                Message = message;
+                Token = token;
             }
         }
+
+        class Parser
+        {
+            private List<Token> tokens;
+            private int pos = 0;
+            public List<SyntaxError> Errors = new List<SyntaxError>();
+
+            public Parser(List<Token> tokens)
+            {
+                this.tokens = tokens;
+            }
+
+            private Token Current
+            {
+                get
+                {
+                    if (pos < tokens.Count)
+                        return tokens[pos];
+                    else
+                        return null;
+                }
+            }
+
+            private void Next() => pos++;
+
+            private void Expect(string type, string value = null)
+            {
+                if (Current == null)
+                {
+                    return;
+                }
+
+                if (Current.type != type || (value != null && Current.token_name != value))
+                {
+                    Errors.Add(new SyntaxError(
+                        $"Ожидалось {type} {(value ?? "")}",
+                        Current
+                    ));
+
+                    Next();
+                }
+                else
+                {
+                    Next();
+                }
+            }
+
+            public void Parse()
+            {
+                ParseProgram();
+            }
+
+            private void ParseProgram()
+            {
+                SkipSpaces();
+
+                while (Current != null)
+                {
+                    ParseFinal();
+                    SkipSpaces();
+                }
+            }
+
+            private void ParseFinal()
+            {
+                Expect("keyword", "final");
+                SkipSpaces();
+                Expect("keyword", "int");
+                SkipSpaces();
+                ParseId();
+                SkipSpaces();
+                ParseAssign();
+                SkipSpaces();
+                ParseNum();
+                SkipSpaces();
+                ParseSemicolon();
+            }
+
+            private void SkipSpaces()
+            {
+                while (Current != null && Current.type == "whitespace")
+                    Next();
+            }
+            private void ParseId()
+            {
+                if (Current == null)
+                {
+                    return;
+                }
+                if (Current.type != "identifier")
+                {
+                    Errors.Add(new SyntaxError("Ожидался идентификатор", Current));
+                    Next();
+                }
+                else
+                {
+                    Next();
+                }
+            }
+            private void ParseAssign()
+            {
+                while (Current != null && Current.type == "whitespace")
+                    Next();
+
+                Expect("operator", "=");
+
+                while (Current != null && Current.type == "whitespace")
+                    Next();
+            }
+            private void ParseNum()
+            {
+                if (Current == null)
+                {
+                    return;
+                }
+                if (Current.type == "operator" &&
+                    (Current.token_name == "+" || Current.token_name == "-"))
+                {
+                    Next();
+                }
+
+                if (Current.type != "digit")
+                {
+                    Errors.Add(new SyntaxError("Ожидалось число", Current));
+                    Next();
+                    return;
+                }
+
+                while (Current != null && Current.type == "digit")
+                    Next();
+            }
+            private void ParseSemicolon()
+            {
+                Expect("separator", ";");
+            }
+        }
+
     }
 }
