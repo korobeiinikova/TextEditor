@@ -31,6 +31,12 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle5 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle6 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle7 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle8 = new DataGridViewCellStyle();
             menuStrip1 = new MenuStrip();
             файлToolStripMenuItem = new ToolStripMenuItem();
             создатьToolStripMenuItem = new ToolStripMenuItem();
@@ -84,6 +90,15 @@
             tabControl1 = new TabControl();
             tabPage1 = new TabPage();
             tabPage2 = new TabPage();
+            tabPage3 = new TabPage();
+            dataGridView4 = new DataGridView();
+            ColumnResult = new DataGridViewTextBoxColumn();
+            ColumnLocationSeach = new DataGridViewTextBoxColumn();
+            ColumnLength = new DataGridViewTextBoxColumn();
+            dataGridView3 = new DataGridView();
+            ColumnTypeSearh = new DataGridViewComboBoxColumn();
+            ColumnTextSearh = new DataGridViewTextBoxColumn();
+            ColumnSearch = new DataGridViewButtonColumn();
             menuStrip1.SuspendLayout();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
@@ -95,6 +110,9 @@
             tabControl1.SuspendLayout();
             tabPage1.SuspendLayout();
             tabPage2.SuspendLayout();
+            tabPage3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView4).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)dataGridView3).BeginInit();
             SuspendLayout();
             // 
             // menuStrip1
@@ -545,6 +563,7 @@
             tabControl1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             tabControl1.Controls.Add(tabPage1);
             tabControl1.Controls.Add(tabPage2);
+            tabControl1.Controls.Add(tabPage3);
             tabControl1.Location = new Point(3, 3);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
@@ -559,7 +578,7 @@
             tabPage1.Padding = new Padding(3);
             tabPage1.Size = new Size(1454, 360);
             tabPage1.TabIndex = 0;
-            tabPage1.Text = "tabPage1";
+            tabPage1.Text = "Tokens";
             tabPage1.UseVisualStyleBackColor = true;
             // 
             // tabPage2
@@ -570,8 +589,147 @@
             tabPage2.Padding = new Padding(3);
             tabPage2.Size = new Size(1454, 360);
             tabPage2.TabIndex = 1;
-            tabPage2.Text = "tabPage2";
+            tabPage2.Text = "Errors";
             tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // tabPage3
+            // 
+            tabPage3.Controls.Add(dataGridView4);
+            tabPage3.Controls.Add(dataGridView3);
+            tabPage3.Location = new Point(8, 46);
+            tabPage3.Name = "tabPage3";
+            tabPage3.Size = new Size(1454, 360);
+            tabPage3.TabIndex = 2;
+            tabPage3.Text = "Search";
+            tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // dataGridView4
+            // 
+            dataGridView4.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridView4.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            dataGridView4.BackgroundColor = SystemColors.ButtonHighlight;
+            dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle3.BackColor = SystemColors.Control;
+            dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle3.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle3.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle3.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle3.WrapMode = DataGridViewTriState.True;
+            dataGridView4.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
+            dataGridView4.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView4.Columns.AddRange(new DataGridViewColumn[] { ColumnResult, ColumnLocationSeach, ColumnLength });
+            dataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle4.BackColor = SystemColors.Window;
+            dataGridViewCellStyle4.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle4.ForeColor = SystemColors.ControlText;
+            dataGridViewCellStyle4.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle4.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle4.WrapMode = DataGridViewTriState.False;
+            dataGridView4.DefaultCellStyle = dataGridViewCellStyle4;
+            dataGridView4.Dock = DockStyle.Fill;
+            dataGridView4.Location = new Point(0, 45);
+            dataGridView4.Name = "dataGridView4";
+            dataGridViewCellStyle5.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = SystemColors.Control;
+            dataGridViewCellStyle5.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle5.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle5.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle5.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle5.WrapMode = DataGridViewTriState.True;
+            dataGridView4.RowHeadersDefaultCellStyle = dataGridViewCellStyle5;
+            dataGridView4.RowHeadersWidth = 82;
+            dataGridView4.RowTemplate.Height = 41;
+            dataGridView4.Size = new Size(1454, 315);
+            dataGridView4.TabIndex = 5;
+            dataGridView4.CellClick += dataGridView4_CellClick;
+            // 
+            // ColumnResult
+            // 
+            ColumnResult.HeaderText = "Result";
+            ColumnResult.MinimumWidth = 10;
+            ColumnResult.Name = "ColumnResult";
+            // 
+            // ColumnLocationSeach
+            // 
+            ColumnLocationSeach.HeaderText = "Location";
+            ColumnLocationSeach.MinimumWidth = 10;
+            ColumnLocationSeach.Name = "ColumnLocationSeach";
+            // 
+            // ColumnLength
+            // 
+            ColumnLength.HeaderText = "Length";
+            ColumnLength.MinimumWidth = 10;
+            ColumnLength.Name = "ColumnLength";
+            // 
+            // dataGridView3
+            // 
+            dataGridView3.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridView3.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            dataGridView3.BackgroundColor = SystemColors.ButtonHighlight;
+            dataGridViewCellStyle6.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle6.BackColor = SystemColors.Control;
+            dataGridViewCellStyle6.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle6.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle6.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle6.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle6.WrapMode = DataGridViewTriState.True;
+            dataGridView3.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle6;
+            dataGridView3.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView3.ColumnHeadersVisible = false;
+            dataGridView3.Columns.AddRange(new DataGridViewColumn[] { ColumnTypeSearh, ColumnTextSearh, ColumnSearch });
+            dataGridViewCellStyle7.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle7.BackColor = SystemColors.Window;
+            dataGridViewCellStyle7.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle7.ForeColor = SystemColors.ControlText;
+            dataGridViewCellStyle7.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle7.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle7.WrapMode = DataGridViewTriState.False;
+            dataGridView3.DefaultCellStyle = dataGridViewCellStyle7;
+            dataGridView3.Dock = DockStyle.Top;
+            dataGridView3.Location = new Point(0, 0);
+            dataGridView3.Name = "dataGridView3";
+            dataGridViewCellStyle8.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle8.BackColor = SystemColors.Control;
+            dataGridViewCellStyle8.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle8.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle8.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle8.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle8.WrapMode = DataGridViewTriState.True;
+            dataGridView3.RowHeadersDefaultCellStyle = dataGridViewCellStyle8;
+            dataGridView3.RowHeadersWidth = 82;
+            dataGridView3.RowTemplate.Height = 41;
+            dataGridView3.Size = new Size(1454, 45);
+            dataGridView3.TabIndex = 0;
+            dataGridView3.CellContentClick += dataGridView3_CellContentClick;
+
+
+            // 
+            // ColumnTypeSearh
+            // 
+            ColumnTypeSearh.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            ColumnTypeSearh.Frozen = true;
+            ColumnTypeSearh.HeaderText = "Type";
+            ColumnTypeSearh.Items.AddRange(new object[] { "задание 1", "задание 2", "задание 3" });
+            ColumnTypeSearh.MinimumWidth = 10;
+            ColumnTypeSearh.Name = "ColumnTypeSearh";
+            ColumnTypeSearh.Resizable = DataGridViewTriState.True;
+            ColumnTypeSearh.ToolTipText = "type";
+            ColumnTypeSearh.Width = 250;
+            // 
+            // ColumnTextSearh
+            // 
+            ColumnTextSearh.HeaderText = "Text";
+            ColumnTextSearh.MinimumWidth = 10;
+            ColumnTextSearh.Name = "ColumnTextSearh";
+            ColumnTextSearh.ReadOnly = true;
+            // 
+            // ColumnSearch
+            // 
+            ColumnSearch.AutoSizeMode = DataGridViewAutoSizeColumnMode.None;
+            ColumnSearch.HeaderText = "Search";
+            ColumnSearch.MinimumWidth = 10;
+            ColumnSearch.Name = "ColumnSearch";
+            ColumnSearch.Width = 300;
             // 
             // Form1
             // 
@@ -600,6 +758,9 @@
             tabControl1.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
             tabPage2.ResumeLayout(false);
+            tabPage3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dataGridView4).EndInit();
+            ((System.ComponentModel.ISupportInitialize)dataGridView3).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -659,5 +820,14 @@
         private DataGridViewTextBoxColumn Column1;
         private DataGridViewTextBoxColumn Column2;
         private DataGridViewTextBoxColumn Column3;
+        private TabPage tabPage3;
+        private DataGridView dataGridView3;
+        private DataGridView dataGridView4;
+        private DataGridViewTextBoxColumn ColumnResult;
+        private DataGridViewTextBoxColumn ColumnLocationSeach;
+        private DataGridViewTextBoxColumn ColumnLength;
+        private DataGridViewComboBoxColumn ColumnTypeSearh;
+        private DataGridViewTextBoxColumn ColumnTextSearh;
+        private DataGridViewButtonColumn ColumnSearch;
     }
 }

@@ -4,6 +4,8 @@ using System;
 using System.Numerics;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Xml.Linq;
+using System.Data.Common;
 
 namespace TextEditor
 {
@@ -17,10 +19,49 @@ namespace TextEditor
             InitializeComponent();
 
             richTextBox1.TextChanged += richTextBox1_TextChanged;
+            dataGridView3.EditingControlShowing += DataGridView3_EditingControlShowing;
             FormClosing += new FormClosingEventHandler(Form1_FormClosing);
 
         }
+        private void DataGridView3_EditingControlShowing(object sender, DataGridViewEditingControlShowingEventArgs e)
+        {
+            if (dataGridView3.CurrentCell.ColumnIndex == ColumnTypeSearh.Index)
+            {
+                ComboBox comboBox = e.Control as ComboBox;
+                if (comboBox != null)
+                {
+                    comboBox.SelectedIndexChanged -= ComboBox_SelectedIndexChanged;
+                    comboBox.SelectedIndexChanged += ComboBox_SelectedIndexChanged;
+                }
+            }
+        }
 
+        private void ComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ComboBox comboBox = sender as ComboBox;
+            if (comboBox != null)
+            {
+                int rowIndex = dataGridView3.CurrentCell.RowIndex;
+                if (rowIndex < 0) return;
+                string selectedText = comboBox.Text;
+                switch (selectedText)
+                {
+                    case "задание 1":
+                        dataGridView3.Rows[rowIndex].Cells[ColumnTextSearh.Index].Value = "Все российские гласные буквы кроме а или А";
+                        break;
+                    case "задание 2":
+                        dataGridView3.Rows[rowIndex].Cells[ColumnTextSearh.Index].Value = "Российские номера мобильных телефонов";
+                        break;
+                    case "задание 3":
+                        dataGridView3.Rows[rowIndex].Cells[ColumnTextSearh.Index].Value = "IP-адрес (v4) с маской подсети";
+                        break;
+                    default:
+                        dataGridView3.Rows[rowIndex].Cells[ColumnTextSearh.Index].Value = "";
+                        break;
+                }
+                dataGridView3.CommitEdit(DataGridViewDataErrorContexts.Commit);
+            }
+        }
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             if (Changes)
@@ -223,153 +264,6 @@ namespace TextEditor
             MessageBox.Show(TextInfo, "О программе");
         }
 
-        private class Lexer
-        {
-            private string text;
-            private string token_name;
-            private Token before_token = new Token();
-            private List<string> texts = new List<string>();
-            private string row;
-            private List<Token> tokens = new List<Token>();
-            public Lexer(string t)
-            {
-                text = t;
-            }
-            private void AddToken(int code, string type, string value, int row, int start, int end)
-            {
-                Token_Location location = new Token_Location
-                {
-                    row = row,
-                    start = start,
-                    end = end
-                };
-                tokens.Add(new Token(code, type, value, location));
-            }
-            private void FinishToken(int row, int endCol)
-            {
-                if (string.IsNullOrEmpty(token_name)) return;
-
-                if (int.TryParse(token_name, out _))
-                {
-                    AddToken(1, "digit", token_name, row, endCol - token_name.Length + 1, endCol);
-                }
-                else if (token_name == "int" || token_name == "final")
-                {
-                    AddToken(3, "keyword", token_name, row, endCol - token_name.Length + 1, endCol);
-                }
-                else
-                {
-                    int start = endCol - token_name.Length + 1;
-                    int i = 0;
-
-                    while (i < token_name.Length)
-                    {
-                        int partStart = i;
-                        bool isLetter = char.IsLetter(token_name[i]);
-
-                        while (i < token_name.Length && char.IsLetter(token_name[i]) == isLetter)
-                            i++;
-
-                        string part = token_name.Substring(partStart, i - partStart);
-                        int partStartCol = start + partStart;
-                        int partEndCol = partStartCol + part.Length - 1;
-
-                        if (isLetter)
-                        {
-                            AddToken(4, "identifier", part, row, partStartCol, partEndCol);
-                        }
-                        else
-                        {
-                            AddToken(7, "error", part, row, partStartCol, partEndCol);
-                        }
-                    }
-                }
-
-                token_name = "";
-            }
-            public List<Token> analyze()
-            {
-                foreach (char c in text)
-                {
-                    if (c != '\n') row += c;
-                    else
-                    {
-                        texts.Add(row);
-                        row = "";
-                    }
-                }
-                if (!string.IsNullOrEmpty(row)) texts.Add(row);
-
-                for (int number_row = 1; number_row <= texts.Count; number_row++)
-                {
-                    int tokenStart = -1;
-                    string line = texts[number_row - 1];
-
-                    for (int i = 0; i < line.Length; i++)
-                    {
-                        char c = line[i];
-                        int col = i + 1;
-
-                        if (c == ' ')
-                        {
-                            FinishToken(number_row, col - 1);
-                            AddToken(8, "whitespace", " ", number_row, col, col);
-                            continue;
-                        }
-                        if (c == '+' || c == '-' || c == '=')
-                        {
-                            FinishToken(number_row, col - 1);
-                            AddToken(5, "operator", c.ToString(), number_row, col, col);
-                            continue;
-                        }
-                        if (c == ';')
-                        {
-                            FinishToken(number_row, col - 1);
-                            AddToken(6, "separator", ";", number_row, col, col);
-                            continue;
-                        }
-                        if (string.IsNullOrEmpty(token_name))
-                            tokenStart = col;
-
-                        token_name += c;
-                    }
-                    FinishToken(number_row, line.Length);
-                }
-
-                return tokens;
-            }
-        }
-        private class Token
-        {
-            public int code;
-            public string type;
-            public string token_name;
-            public Token_Location location;
-            public Token(int T_Code, string T_Type, string T_Token, Token_Location T_Location)
-            {
-                code = T_Code;
-                type = T_Type;
-                token_name = T_Token;
-                location = T_Location;
-            }
-            public Token()
-            {
-                code = 0;
-                type = "no";
-                token_name = "no";
-                location = new Token_Location();
-            }
-        }
-        private struct Token_Location
-        {
-            public int row;
-            public int start;
-            public int end;
-            public string To_String()
-            {
-                return $"{row} строка, {start}-{end}";
-            }
-        }
         public void пускToolStripMenuItem_Click(object sender, EventArgs e)
         {
             dataGridView1.Rows.Clear();
@@ -404,9 +298,10 @@ namespace TextEditor
                     error.Message
                 );
             }
-            
-            if(parser.Errors.Count != 0) tabControl1.SelectedTab = tabPage2;
+
+            if (parser.Errors.Count != 0) tabControl1.SelectedTab = tabPage2;
         }
+
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0) return;
@@ -434,6 +329,7 @@ namespace TextEditor
             richTextBox1.SelectionLength = length;
             richTextBox1.Focus();
         }
+
         private void dataGridView2_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex <= 0) return;
@@ -454,6 +350,25 @@ namespace TextEditor
             richTextBox1.SelectionLength = fragment.Length;
             richTextBox1.Focus();
         }
+
+        private void dataGridView4_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex <= 0) return;
+            if (dataGridView4.Rows[e.RowIndex].Cells[1].Value == null) return;
+            string locationText = dataGridView4.Rows[e.RowIndex].Cells[1].Value.ToString();
+            int fragmentLength = int.Parse(dataGridView4.Rows[e.RowIndex].Cells[2].Value.ToString());
+
+            var parts = locationText.Split(',');
+
+            int row = int.Parse(parts[0]);
+            int col = int.Parse(parts[1]);
+
+            int index = GetIndexFromRowCol(row, col);
+            richTextBox1.SelectionStart = index;
+            richTextBox1.SelectionLength = fragmentLength;
+            richTextBox1.Focus();
+        }
+
         private int GetIndexFromRowCol(int row, int col)
         {
             int index = 0;
@@ -471,153 +386,46 @@ namespace TextEditor
 
             return index + col - 1;
         }
-        class SyntaxError
+
+        private void dataGridView3_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
-            public string Message;
-            public Token Token;
-
-            public SyntaxError(string message, Token token)
+            List<Searcher> searchers = new List<Searcher>();
+            string row = "";
+            string text = richTextBox1.Text;
+            List<string> texts = new List<string>();
+            foreach (char c in text)
             {
-                Message = message;
-                Token = token;
-            }
-        }
-
-        class Parser
-        {
-            private List<Token> tokens;
-            private int pos = 0;
-            public List<SyntaxError> Errors = new List<SyntaxError>();
-
-            public Parser(List<Token> tokens)
-            {
-                this.tokens = tokens;
-            }
-
-            private Token Current
-            {
-                get
-                {
-                    if (pos < tokens.Count)
-                        return tokens[pos];
-                    else
-                        return null;
-                }
-            }
-
-            private void Next() => pos++;
-
-            private void Expect(string type, string value = null)
-            {
-                if (Current == null)
-                {
-                    return;
-                }
-
-                if (Current.type != type || (value != null && Current.token_name != value))
-                {
-                    Errors.Add(new SyntaxError(
-                        $"Ожидалось {type} {(value ?? "")}",
-                        Current
-                    ));
-
-                    Next();
-                }
+                if (c != '\n') row += c;
                 else
                 {
-                    Next();
+                    texts.Add(row);
+                    row = "";
                 }
             }
+            if (!string.IsNullOrEmpty(row)) texts.Add(row);
 
-            public void Parse()
+            if (dataGridView3.Rows[0].Cells[0].Value == null)
             {
-                ParseProgram();
+                MessageBox.Show("Выберите тип поиска");
             }
-
-            private void ParseProgram()
+            Search search = new Search(searchers, texts);
+            switch (dataGridView3.Rows[0].Cells[0].Value)
             {
-                SkipSpaces();
-
-                while (Current != null)
-                {
-                    ParseFinal();
-                    SkipSpaces();
-                }
+                case "задание 1":
+                    searchers = search.SearchLetters();
+                    break;
+                case "задание 2":
+                    searchers = search.SearchPhoneNumber();
+                    break;
+                case "задание 3":
+                    searchers = search.SearchIP();
+                    break;
             }
-
-            private void ParseFinal()
+            dataGridView4.Rows.Clear();
+            foreach (Searcher s in searchers)
             {
-                Expect("keyword", "final");
-                SkipSpaces();
-                Expect("keyword", "int");
-                SkipSpaces();
-                ParseId();
-                SkipSpaces();
-                ParseAssign();
-                SkipSpaces();
-                ParseNum();
-                SkipSpaces();
-                ParseSemicolon();
-            }
-
-            private void SkipSpaces()
-            {
-                while (Current != null && Current.type == "whitespace")
-                    Next();
-            }
-            private void ParseId()
-            {
-                if (Current == null)
-                {
-                    return;
-                }
-                if (Current.type != "identifier")
-                {
-                    Errors.Add(new SyntaxError("Ожидался идентификатор", Current));
-                    Next();
-                }
-                else
-                {
-                    Next();
-                }
-            }
-            private void ParseAssign()
-            {
-                while (Current != null && Current.type == "whitespace")
-                    Next();
-
-                Expect("operator", "=");
-
-                while (Current != null && Current.type == "whitespace")
-                    Next();
-            }
-            private void ParseNum()
-            {
-                if (Current == null)
-                {
-                    return;
-                }
-                if (Current.type == "operator" &&
-                    (Current.token_name == "+" || Current.token_name == "-"))
-                {
-                    Next();
-                }
-
-                if (Current.type != "digit")
-                {
-                    Errors.Add(new SyntaxError("Ожидалось число", Current));
-                    Next();
-                    return;
-                }
-
-                while (Current != null && Current.type == "digit")
-                    Next();
-            }
-            private void ParseSemicolon()
-            {
-                Expect("separator", ";");
+                dataGridView4.Rows.Add(s.fragment, $"{s.location.row}, {s.location.start}", $"{s.location.end - s.location.start + 1}");
             }
         }
-
     }
 }
