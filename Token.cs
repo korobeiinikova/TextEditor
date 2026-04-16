@@ -46,7 +46,12 @@ namespace TextEditor
     public class SyntaxError
     {
         public string Message;
+        public string Fragment;
+        public int Line;
+        public int Column;
         public Token Token;
+
+        public SyntaxError() { }
 
         public SyntaxError(string message, Token token)
         {
