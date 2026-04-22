@@ -99,6 +99,8 @@
             ColumnTypeSearh = new DataGridViewComboBoxColumn();
             ColumnTextSearh = new DataGridViewTextBoxColumn();
             ColumnSearch = new DataGridViewButtonColumn();
+            tabPage4 = new TabPage();
+            richTextBox2 = new RichTextBox();
             menuStrip1.SuspendLayout();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
@@ -113,6 +115,7 @@
             tabPage3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView4).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dataGridView3).BeginInit();
+            tabPage4.SuspendLayout();
             SuspendLayout();
             // 
             // menuStrip1
@@ -564,6 +567,7 @@
             tabControl1.Controls.Add(tabPage1);
             tabControl1.Controls.Add(tabPage2);
             tabControl1.Controls.Add(tabPage3);
+            tabControl1.Controls.Add(tabPage4);
             tabControl1.Location = new Point(3, 3);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
@@ -701,8 +705,6 @@
             dataGridView3.Size = new Size(1454, 45);
             dataGridView3.TabIndex = 0;
             dataGridView3.CellContentClick += dataGridView3_CellContentClick;
-
-
             // 
             // ColumnTypeSearh
             // 
@@ -730,6 +732,26 @@
             ColumnSearch.MinimumWidth = 10;
             ColumnSearch.Name = "ColumnSearch";
             ColumnSearch.Width = 300;
+            // 
+            // tabPage4
+            // 
+            tabPage4.Controls.Add(richTextBox2);
+            tabPage4.Location = new Point(8, 46);
+            tabPage4.Name = "tabPage4";
+            tabPage4.Padding = new Padding(3);
+            tabPage4.Size = new Size(1454, 360);
+            tabPage4.TabIndex = 3;
+            tabPage4.Text = "AST";
+            tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // richTextBox2
+            // 
+            richTextBox2.Dock = DockStyle.Fill;
+            richTextBox2.Location = new Point(3, 3);
+            richTextBox2.Name = "richTextBox2";
+            richTextBox2.Size = new Size(1448, 354);
+            richTextBox2.TabIndex = 0;
+            richTextBox2.Text = "";
             // 
             // Form1
             // 
@@ -761,6 +783,7 @@
             tabPage3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)dataGridView4).EndInit();
             ((System.ComponentModel.ISupportInitialize)dataGridView3).EndInit();
+            tabPage4.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -829,5 +852,7 @@
         private DataGridViewComboBoxColumn ColumnTypeSearh;
         private DataGridViewTextBoxColumn ColumnTextSearh;
         private DataGridViewButtonColumn ColumnSearch;
+        private TabPage tabPage4;
+        private RichTextBox richTextBox2;
     }
 }

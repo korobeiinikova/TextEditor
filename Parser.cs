@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Numerics;
 
 namespace TextEditor
 {
@@ -73,6 +69,16 @@ namespace TextEditor
             }
         }
 
+        private sealed class ParsedDeclaration
+        {
+            public Token NameToken { get; init; } = new Token();
+            public Token TypeToken { get; init; } = new Token();
+            public Token ValueToken { get; init; } = new Token();
+            public Token? SignToken { get; init; }
+            public string RawValue { get; init; } = string.Empty;
+            public BigInteger NumericValue { get; init; }
+        }
+
         private static readonly ExpectedSymbol[] StatementPattern =
         {
             new ExpectedSymbol(token => token.type == "keyword" && token.token_name == "final", "'final'"),
@@ -112,35 +118,27 @@ namespace TextEditor
             SignedNegativeStatementPattern
         };
 
-        private List<Token> tokens;
-        private int pos = 0;
-        public List<SyntaxError> Errors = new List<SyntaxError>();
+        private readonly List<Token> tokens;
+        private int pos;
+        private readonly HashSet<string> declaredIdentifiers = new HashSet<string>(StringComparer.Ordinal);
+        private readonly Dictionary<string, int> declarationLines = new Dictionary<string, int>(StringComparer.Ordinal);
 
+        public List<SyntaxError> Errors { get; private set; } = new List<SyntaxError>();
+        public ParserResult Result { get; private set; } = new ParserResult();
+        public string AstText => Result.GetAstText();
 
-        public Parser(List<Token> Tokens)
+        public Parser(List<Token> tokens)
         {
-            tokens = Tokens;
-        }
-
-        private Token Current
-        {
-            get
-            {
-                if (pos < tokens.Count)
-                    return tokens[pos];
-                else
-                    return null!;
-            }
-        }
-
-        private void Next()
-        {
-            pos++;
+            this.tokens = tokens;
         }
 
         public void Parse()
         {
             Errors = new List<SyntaxError>();
+            Result = new ParserResult();
+            declaredIdentifiers.Clear();
+            declarationLines.Clear();
+
             var syntaxTokens = tokens.Where(t => t.type != "whitespace").ToList();
             pos = 0;
 
@@ -187,16 +185,12 @@ namespace TextEditor
             {
                 return;
             }
+
             var statementTokens = new List<Token>();
 
             while (pos < syntaxTokens.Count)
             {
-                var current = CurrentToken(syntaxTokens);
-                if (current == null)
-                {
-                    break;
-                }
-
+                var current = syntaxTokens[pos];
                 statementTokens.Add(current);
                 pos++;
 
@@ -206,33 +200,50 @@ namespace TextEditor
                 }
             }
 
-            if (statementTokens.Count > 0)
-            {
-                ValidateStatement(statementTokens);
-            }
-        }
-
-        private void ValidateStatement(List<Token> tokens)
-        {
-            if (tokens == null || tokens.Count == 0)
+            if (statementTokens.Count == 0)
             {
                 return;
             }
 
-            RecoveryPlan bestPlan = null;
+            if (!ValidateStatement(statementTokens))
+            {
+                return;
+            }
+
+            var declaration = BuildDeclaration(statementTokens);
+            if (declaration == null)
+            {
+                return;
+            }
+
+            if (!ValidateSemantics(declaration))
+            {
+                return;
+            }
+
+            declaredIdentifiers.Add(declaration.NameToken.token_name);
+            declarationLines[declaration.NameToken.token_name] = declaration.NameToken.location.row;
+            Result.Program.Declarations.Add(CreateAstNode(declaration));
+        }
+
+        private bool ValidateStatement(List<Token> statementTokens)
+        {
+            RecoveryPlan? bestPlan = null;
 
             foreach (var pattern in StatementPatterns)
             {
-                var memo = new RecoveryPlan[tokens.Count + 1, pattern.Length + 1];
-                var calculated = new bool[tokens.Count + 1, pattern.Length + 1];
-                var plan = BuildRecoveryPlan(tokens, 0, 0, pattern, memo, calculated);
+                var memo = new RecoveryPlan[statementTokens.Count + 1, pattern.Length + 1];
+                var calculated = new bool[statementTokens.Count + 1, pattern.Length + 1];
+                var plan = BuildRecoveryPlan(statementTokens, 0, 0, pattern, memo, calculated);
                 bestPlan = ChooseBetter(bestPlan, plan);
             }
 
             if (bestPlan == null)
             {
-                return;
+                return false;
             }
+
+            var hasErrors = bestPlan.Actions.Count > 0;
 
             for (var i = 0; i < bestPlan.Actions.Count; i++)
             {
@@ -240,7 +251,7 @@ namespace TextEditor
 
                 if (action.Kind == RecoveryActionKind.InsertMissing)
                 {
-                    var fragmentInfo = GetFragmentInfoForInsertion(tokens, bestPlan.Actions, action);
+                    var fragmentInfo = GetFragmentInfoForInsertion(statementTokens, bestPlan.Actions, action);
                     AddMissingSequenceError(
                         bestPlan.Pattern,
                         action.ExpectedFrom,
@@ -253,9 +264,9 @@ namespace TextEditor
 
                 if (action.Kind == RecoveryActionKind.DeleteUnexpected)
                 {
-                    var shouldSuppressUnexpectedFragment = IsUnexpectedFragmentCoveredByInsertion(bestPlan.Actions, i);
-                    var fragmentInfo = GetFragmentInfoForUnexpectedTokens(tokens, bestPlan.Actions, ref i);
-                    if (!shouldSuppressUnexpectedFragment)
+                    var suppressUnexpected = IsUnexpectedFragmentCoveredByInsertion(bestPlan.Actions, i);
+                    var fragmentInfo = GetFragmentInfoForUnexpectedTokens(statementTokens, bestPlan.Actions, ref i);
+                    if (!suppressUnexpected)
                     {
                         AddUnexpectedFragmentError(fragmentInfo.Fragment, fragmentInfo.Line, fragmentInfo.Column);
                     }
@@ -265,9 +276,9 @@ namespace TextEditor
 
                 if (action.Kind == RecoveryActionKind.ReportLexerError
                     && action.TokenIndex >= 0
-                    && action.TokenIndex < tokens.Count)
+                    && action.TokenIndex < statementTokens.Count)
                 {
-                    var token = tokens[action.TokenIndex];
+                    var token = statementTokens[action.TokenIndex];
                     Errors.Add(new SyntaxError
                     {
                         Message = ConvertLexerErrorToMessage(token),
@@ -278,6 +289,118 @@ namespace TextEditor
                     });
                 }
             }
+
+            return !hasErrors;
+        }
+
+        private ParsedDeclaration? BuildDeclaration(List<Token> statementTokens)
+        {
+            if (statementTokens.Count != 6 && statementTokens.Count != 7)
+            {
+                return null;
+            }
+
+            var hasSign = statementTokens.Count == 7;
+            var signToken = hasSign ? statementTokens[4] : null;
+            var valueToken = hasSign ? statementTokens[5] : statementTokens[4];
+            var rawValue = hasSign ? signToken!.token_name + valueToken.token_name : valueToken.token_name;
+
+            if (!BigInteger.TryParse(rawValue, out var numericValue))
+            {
+                return null;
+            }
+
+            return new ParsedDeclaration
+            {
+                NameToken = statementTokens[2],
+                TypeToken = statementTokens[1],
+                ValueToken = valueToken,
+                SignToken = signToken,
+                RawValue = rawValue,
+                NumericValue = numericValue
+            };
+        }
+
+        private bool ValidateSemantics(ParsedDeclaration declaration)
+        {
+            var hasSemanticErrors = false;
+
+            if (declaredIdentifiers.Contains(declaration.NameToken.token_name))
+            {
+                AddSemanticError(
+                    $"Ошибка: идентификатор \"{declaration.NameToken.token_name}\" уже объявлен ранее (строка {FindFirstDeclarationLine(declaration.NameToken.token_name)})",
+                    declaration.NameToken);
+                hasSemanticErrors = true;
+            }
+
+            if (!string.Equals(declaration.TypeToken.token_name, "int", StringComparison.Ordinal))
+            {
+                AddSemanticError(
+                    BuildTypeCompatibilityErrorMessage(declaration),
+                    declaration.ValueToken);
+                hasSemanticErrors = true;
+            }
+
+            if (declaration.NumericValue < int.MinValue || declaration.NumericValue > int.MaxValue)
+            {
+                AddSemanticError(
+                    BuildRangeErrorMessage(declaration),
+                    declaration.SignToken ?? declaration.ValueToken);
+                hasSemanticErrors = true;
+            }
+
+            return !hasSemanticErrors;
+        }
+
+        private int FindFirstDeclarationLine(string identifier)
+        {
+            return declarationLines.TryGetValue(identifier, out var line) ? line : 0;
+        }
+
+        private FinalIntDeclarationNode CreateAstNode(ParsedDeclaration declaration)
+        {
+            return new FinalIntDeclarationNode
+            {
+                Modifiers = { "final" },
+                Name = declaration.NameToken.token_name,
+                Type = new TypeNode { Name = declaration.TypeToken.token_name },
+                Value = new IntLiteralNode
+                {
+                    Value = declaration.NumericValue,
+                    RawValue = declaration.RawValue,
+                    Location = declaration.SignToken?.location ?? declaration.ValueToken.location
+                },
+                Location = declaration.NameToken.location
+            };
+        }
+
+        private void AddSemanticError(string message, Token token)
+        {
+            Errors.Add(new SyntaxError
+            {
+                Message = message,
+                Fragment = token.token_name,
+                Line = token.location.row,
+                Column = token.location.start,
+                Token = token
+            });
+        }
+
+        private static string BuildTypeCompatibilityErrorMessage(ParsedDeclaration declaration)
+        {
+            return
+                $"Ошибка. Правило 2 (совместимость типов) нарушено: " +
+                $"для идентификатора \"{declaration.NameToken.token_name}\" объявлен тип \"{declaration.TypeToken.token_name}\", " +
+                $"но инициализирующее значение \"{declaration.RawValue}\" имеет тип \"целочисленный литерал\". " +
+                $"Тип значения должен соответствовать объявленному типу переменной.";
+        }
+
+        private static string BuildRangeErrorMessage(ParsedDeclaration declaration)
+        {
+            return
+                $"Ошибка. Правило 3 (допустимые значения) нарушено: " +
+                $"значение \"{declaration.RawValue}\" для идентификатора \"{declaration.NameToken.token_name}\" " +
+                $"не входит в допустимый диапазон типа int: от {int.MinValue} до {int.MaxValue}.";
         }
 
         private RecoveryPlan BuildRecoveryPlan(
@@ -320,13 +443,13 @@ namespace TextEditor
             }
             else
             {
-                bestPlan = null;
+                bestPlan = null!;
                 var currentToken = tokens[tokenIndex];
 
                 if (IsMatch(currentToken, expectedIndex, pattern))
                 {
                     var matchPlan = BuildRecoveryPlan(tokens, tokenIndex + 1, expectedIndex + 1, pattern, memo, calculated);
-                    RecoveryAction matchAction = null;
+                    RecoveryAction? matchAction = null;
 
                     if (pattern[expectedIndex].AllowLexerError && currentToken.type == "error")
                     {
@@ -337,8 +460,7 @@ namespace TextEditor
                             expectedIndex + 1);
                     }
 
-                    var candidate = PrependAction(matchPlan, matchAction, 0, 0, 0, pattern);
-                    bestPlan = ChooseBetter(bestPlan, candidate);
+                    bestPlan = ChooseBetter(bestPlan, PrependAction(matchPlan, matchAction, 0, 0, 0, pattern));
                 }
 
                 var deletePlan = BuildRecoveryPlan(tokens, tokenIndex + 1, expectedIndex, pattern, memo, calculated);
@@ -376,7 +498,7 @@ namespace TextEditor
 
         private static RecoveryPlan PrependAction(
             RecoveryPlan basePlan,
-            RecoveryAction action,
+            RecoveryAction? action,
             int recoveryDelta,
             int deletedDelta,
             int insertedDelta,
@@ -401,7 +523,7 @@ namespace TextEditor
                 basePlan?.Pattern ?? pattern);
         }
 
-        private static RecoveryPlan ChooseBetter(RecoveryPlan current, RecoveryPlan candidate)
+        private static RecoveryPlan? ChooseBetter(RecoveryPlan? current, RecoveryPlan? candidate)
         {
             if (candidate == null)
             {
@@ -447,7 +569,7 @@ namespace TextEditor
             List<RecoveryAction> actions,
             RecoveryAction insertAction)
         {
-            if (tokens == null || tokens.Count == 0)
+            if (tokens.Count == 0)
             {
                 return ("", 1, 1);
             }
@@ -489,24 +611,15 @@ namespace TextEditor
                 return (token.token_name, token.location.row, token.location.start);
             }
 
-            if (tokens.Count > 0)
-            {
-                var lastToken = tokens[^1];
-                return (lastToken.token_name, lastToken.location.row, lastToken.location.end);
-            }
-
-            return ("EOF", 1, 1);
+            var lastToken = tokens[^1];
+            return (lastToken.token_name, lastToken.location.row, lastToken.location.end);
         }
 
         private static string BuildFragment(List<Token> tokens, int startIndex, int endIndex)
         {
-            if (tokens == null
-                || tokens.Count == 0
-                || startIndex < 0
-                || endIndex < startIndex
-                || endIndex >= tokens.Count)
+            if (startIndex < 0 || endIndex < startIndex || endIndex >= tokens.Count)
             {
-                return "";
+                return string.Empty;
             }
 
             var parts = new List<string>();
@@ -523,7 +636,7 @@ namespace TextEditor
             List<RecoveryAction> actions,
             ref int actionIndex)
         {
-            if (tokens == null || tokens.Count == 0)
+            if (tokens.Count == 0)
             {
                 return ("", 1, 1);
             }
@@ -559,11 +672,6 @@ namespace TextEditor
 
         private static bool IsUnexpectedFragmentCoveredByInsertion(List<RecoveryAction> actions, int actionIndex)
         {
-            if (actions == null || actionIndex < 0 || actionIndex >= actions.Count)
-            {
-                return false;
-            }
-
             var nextActionIndex = actionIndex;
             while (nextActionIndex < actions.Count && actions[nextActionIndex].Kind == RecoveryActionKind.DeleteUnexpected)
             {
@@ -576,11 +684,6 @@ namespace TextEditor
 
         private static string BuildFragmentFromIndexes(List<Token> tokens, List<int> tokenIndexes)
         {
-            if (tokens == null || tokenIndexes == null || tokenIndexes.Count == 0)
-            {
-                return "";
-            }
-
             var parts = new List<string>();
             foreach (var tokenIndex in tokenIndexes)
             {
@@ -636,26 +739,6 @@ namespace TextEditor
                 Column = column,
                 Token = errorToken
             });
-        }
-
-        private Token CurrentToken(List<Token> syntaxTokens)
-        {
-            if (pos < syntaxTokens.Count)
-            {
-                return syntaxTokens[pos];
-            }
-
-            return null;
-        }
-
-        private int CurrentLine(List<Token> syntaxTokens)
-        {
-            if (pos < syntaxTokens.Count)
-            {
-                return syntaxTokens[pos].location.row;
-            }
-
-            return 1;
         }
 
         private static string ConvertLexerErrorToMessage(Token token)

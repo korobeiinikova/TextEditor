@@ -268,6 +268,7 @@ namespace TextEditor
         {
             dataGridView1.Rows.Clear();
             dataGridView2.Rows.Clear();
+            richTextBox2.Clear();
 
             Lexer lexer = new Lexer(richTextBox1.Text);
             List<Token> tokens = lexer.analyze();
@@ -284,13 +285,14 @@ namespace TextEditor
 
             Parser parser = new Parser(tokens);
             parser.Parse();
-            dataGridView2.Rows.Add($"Общее количество ошибок: {parser.Errors.Count}");
+            richTextBox2.Text = parser.AstText;
+            dataGridView2.Rows.Add("", "", $"Количество ошибок: {parser.Errors.Count}");
             foreach (SyntaxError error in parser.Errors)
             {
                 string fragment = error.Token?.token_name ?? "EOF";
                 string location = error.Token != null
                     ? $"{error.Token.location.row} строка, позиция {error.Token.location.start}"
-                    : "—";
+                    : "";
 
                 dataGridView2.Rows.Add(
                     fragment,
@@ -334,8 +336,11 @@ namespace TextEditor
         {
             if (e.RowIndex <= 0) return;
 
-            string locationText = dataGridView2.Rows[e.RowIndex].Cells[1].Value.ToString();
-            string fragment = dataGridView2.Rows[e.RowIndex].Cells[0].Value.ToString();
+            string? locationText = dataGridView2.Rows[e.RowIndex].Cells[1].Value?.ToString();
+            string? fragment = dataGridView2.Rows[e.RowIndex].Cells[0].Value?.ToString();
+
+            if (string.IsNullOrWhiteSpace(locationText) || string.IsNullOrEmpty(fragment))
+                return;
 
             var parts = locationText
                 .Replace("строка", "")
