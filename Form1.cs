@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using System.Windows.Forms;
 using System;
 using System.Numerics;
@@ -20,6 +20,7 @@ namespace TextEditor
 
             richTextBox1.TextChanged += richTextBox1_TextChanged;
             dataGridView3.EditingControlShowing += DataGridView3_EditingControlShowing;
+            dataGridView5.CellClick += dataGridView5_CellClick;
             FormClosing += new FormClosingEventHandler(Form1_FormClosing);
 
         }
@@ -268,7 +269,10 @@ namespace TextEditor
         {
             dataGridView1.Rows.Clear();
             dataGridView2.Rows.Clear();
+            dataGridView5.Rows.Clear();
+            dataGridView6.Rows.Clear();
             richTextBox2.Clear();
+            richTextBox3.Clear();
 
             Lexer lexer = new Lexer(richTextBox1.Text);
             List<Token> tokens = lexer.analyze();
@@ -302,6 +306,43 @@ namespace TextEditor
             }
 
             if (parser.Errors.Count != 0) tabControl1.SelectedTab = tabPage2;
+
+            var lab6Result = Lab6Processor.Run(richTextBox1.Text);
+            FillLab6ErrorsGrid(lab6Result);
+            FillLab6TextGrid(dataGridView6, lab6Result.QuadsText, $"Количество тетрад: {lab6Result.QuadCount}");
+            richTextBox3.Text = lab6Result.PolizText;
+        }
+
+        private void FillLab6ErrorsGrid(Lab6RunResult result)
+        {
+            dataGridView5.Rows.Clear();
+            dataGridView5.Rows.Add("", "", $"Количество ошибок: {result.ErrorRows.Count}");
+
+            if (result.ErrorRows.Count == 0)
+            {
+                dataGridView5.Rows.Add("", "", result.ErrorsText.Trim());
+                return;
+            }
+
+            foreach (var error in result.ErrorRows)
+            {
+                dataGridView5.Rows.Add(error.Fragment, error.Location, error.Description);
+            }
+        }
+
+        private static void FillLab6TextGrid(DataGridView grid, string text, string countText)
+        {
+            grid.Rows.Clear();
+            grid.Rows.Add(countText);
+
+            var lines = text.Replace("\r", string.Empty).Split('\n');
+            foreach (var line in lines)
+            {
+                if (!string.IsNullOrWhiteSpace(line))
+                {
+                    grid.Rows.Add(line.Trim());
+                }
+            }
         }
 
         private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
@@ -346,6 +387,32 @@ namespace TextEditor
                 .Replace("строка", "")
                 .Replace("позиция", "")
                 .Split(',');
+
+            int row = int.Parse(parts[0]);
+            int col = int.Parse(parts[1]);
+
+            int index = GetIndexFromRowCol(row, col);
+            richTextBox1.SelectionStart = index;
+            richTextBox1.SelectionLength = fragment.Length;
+            richTextBox1.Focus();
+        }
+
+        private void dataGridView5_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex <= 0) return;
+
+            string? fragment = dataGridView5.Rows[e.RowIndex].Cells[0].Value?.ToString();
+            string? locationText = dataGridView5.Rows[e.RowIndex].Cells[1].Value?.ToString();
+
+            if (string.IsNullOrWhiteSpace(locationText) || string.IsNullOrEmpty(fragment))
+                return;
+
+            var parts = locationText
+                .Replace("строка", "")
+                .Replace("позиция", "")
+                .Split(',');
+
+            if (parts.Length < 2) return;
 
             int row = int.Parse(parts[0]);
             int col = int.Parse(parts[1]);

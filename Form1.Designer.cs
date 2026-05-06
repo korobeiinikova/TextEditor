@@ -37,6 +37,10 @@
             DataGridViewCellStyle dataGridViewCellStyle6 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle7 = new DataGridViewCellStyle();
             DataGridViewCellStyle dataGridViewCellStyle8 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle9 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle10 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle11 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle12 = new DataGridViewCellStyle();
             menuStrip1 = new MenuStrip();
             файлToolStripMenuItem = new ToolStripMenuItem();
             создатьToolStripMenuItem = new ToolStripMenuItem();
@@ -101,6 +105,16 @@
             ColumnSearch = new DataGridViewButtonColumn();
             tabPage4 = new TabPage();
             richTextBox2 = new RichTextBox();
+            tabPage5 = new TabPage();
+            dataGridView5 = new DataGridView();
+            ColumnLab6ErrorFragment = new DataGridViewTextBoxColumn();
+            ColumnLab6ErrorLocation = new DataGridViewTextBoxColumn();
+            ColumnLab6ErrorDescription = new DataGridViewTextBoxColumn();
+            tabPage6 = new TabPage();
+            dataGridView6 = new DataGridView();
+            ColumnLab6Quad = new DataGridViewTextBoxColumn();
+            tabPage7 = new TabPage();
+            richTextBox3 = new RichTextBox();
             menuStrip1.SuspendLayout();
             toolStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
@@ -116,6 +130,11 @@
             ((System.ComponentModel.ISupportInitialize)dataGridView4).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dataGridView3).BeginInit();
             tabPage4.SuspendLayout();
+            tabPage5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView5).BeginInit();
+            tabPage6.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)dataGridView6).BeginInit();
+            tabPage7.SuspendLayout();
             SuspendLayout();
             // 
             // menuStrip1
@@ -568,6 +587,9 @@
             tabControl1.Controls.Add(tabPage2);
             tabControl1.Controls.Add(tabPage3);
             tabControl1.Controls.Add(tabPage4);
+            tabControl1.Controls.Add(tabPage5);
+            tabControl1.Controls.Add(tabPage6);
+            tabControl1.Controls.Add(tabPage7);
             tabControl1.Location = new Point(3, 3);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
@@ -753,6 +775,144 @@
             richTextBox2.TabIndex = 0;
             richTextBox2.Text = "";
             // 
+            // tabPage5
+            // 
+            tabPage5.Controls.Add(dataGridView5);
+            tabPage5.Location = new Point(8, 46);
+            tabPage5.Name = "tabPage5";
+            tabPage5.Padding = new Padding(3);
+            tabPage5.Size = new Size(1454, 360);
+            tabPage5.TabIndex = 4;
+            tabPage5.Text = "LAB6 Ошибки";
+            tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // dataGridView5
+            // 
+            dataGridView5.AllowUserToAddRows = false;
+            dataGridView5.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridView5.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            dataGridView5.BackgroundColor = SystemColors.ButtonHighlight;
+            dataGridViewCellStyle9.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle9.BackColor = SystemColors.Control;
+            dataGridViewCellStyle9.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle9.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle9.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle9.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle9.WrapMode = DataGridViewTriState.True;
+            dataGridView5.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle9;
+            dataGridView5.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView5.Columns.AddRange(new DataGridViewColumn[] { ColumnLab6ErrorFragment, ColumnLab6ErrorLocation, ColumnLab6ErrorDescription });
+            dataGridViewCellStyle10.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle10.BackColor = SystemColors.Window;
+            dataGridViewCellStyle10.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle10.ForeColor = SystemColors.ControlText;
+            dataGridViewCellStyle10.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle10.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle10.WrapMode = DataGridViewTriState.False;
+            dataGridView5.DefaultCellStyle = dataGridViewCellStyle10;
+            dataGridView5.Dock = DockStyle.Fill;
+            dataGridView5.Location = new Point(3, 3);
+            dataGridView5.Name = "dataGridView5";
+            dataGridView5.ReadOnly = true;
+            dataGridView5.RowHeadersWidth = 82;
+            dataGridView5.RowTemplate.Height = 41;
+            dataGridView5.Size = new Size(1448, 354);
+            dataGridView5.TabIndex = 0;
+            // 
+            // ColumnLab6ErrorFragment
+            // 
+            ColumnLab6ErrorFragment.HeaderText = "Неверный фрагмент ";
+            ColumnLab6ErrorFragment.MinimumWidth = 10;
+            ColumnLab6ErrorFragment.Name = "ColumnLab6ErrorFragment";
+            ColumnLab6ErrorFragment.ReadOnly = true;
+            // 
+            // ColumnLab6ErrorLocation
+            // 
+            ColumnLab6ErrorLocation.HeaderText = "Местоположение";
+            ColumnLab6ErrorLocation.MinimumWidth = 10;
+            ColumnLab6ErrorLocation.Name = "ColumnLab6ErrorLocation";
+            ColumnLab6ErrorLocation.ReadOnly = true;
+            // 
+            // ColumnLab6ErrorDescription
+            // 
+            ColumnLab6ErrorDescription.HeaderText = "Описание";
+            ColumnLab6ErrorDescription.MinimumWidth = 10;
+            ColumnLab6ErrorDescription.Name = "ColumnLab6ErrorDescription";
+            ColumnLab6ErrorDescription.ReadOnly = true;
+            // 
+            // tabPage6
+            // 
+            tabPage6.Controls.Add(dataGridView6);
+            tabPage6.Location = new Point(8, 46);
+            tabPage6.Name = "tabPage6";
+            tabPage6.Padding = new Padding(3);
+            tabPage6.Size = new Size(1454, 360);
+            tabPage6.TabIndex = 5;
+            tabPage6.Text = "LAB6 Тетрады";
+            tabPage6.UseVisualStyleBackColor = true;
+            // 
+            // dataGridView6
+            // 
+            dataGridView6.AllowUserToAddRows = false;
+            dataGridView6.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+            dataGridView6.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            dataGridView6.BackgroundColor = SystemColors.ButtonHighlight;
+            dataGridViewCellStyle11.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle11.BackColor = SystemColors.Control;
+            dataGridViewCellStyle11.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle11.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle11.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle11.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle11.WrapMode = DataGridViewTriState.True;
+            dataGridView6.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle11;
+            dataGridView6.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView6.Columns.AddRange(new DataGridViewColumn[] { ColumnLab6Quad });
+            dataGridViewCellStyle12.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle12.BackColor = SystemColors.Window;
+            dataGridViewCellStyle12.Font = new Font("Segoe UI", 9F, FontStyle.Regular, GraphicsUnit.Point);
+            dataGridViewCellStyle12.ForeColor = SystemColors.ControlText;
+            dataGridViewCellStyle12.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle12.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle12.WrapMode = DataGridViewTriState.False;
+            dataGridView6.DefaultCellStyle = dataGridViewCellStyle12;
+            dataGridView6.Dock = DockStyle.Fill;
+            dataGridView6.Location = new Point(3, 3);
+            dataGridView6.Name = "dataGridView6";
+            dataGridView6.ReadOnly = true;
+            dataGridView6.RowHeadersWidth = 82;
+            dataGridView6.RowTemplate.Height = 41;
+            dataGridView6.Size = new Size(1448, 354);
+            dataGridView6.TabIndex = 0;
+            // 
+            // ColumnLab6Quad
+            // 
+            ColumnLab6Quad.HeaderText = "Описание";
+            ColumnLab6Quad.MinimumWidth = 10;
+            ColumnLab6Quad.Name = "ColumnLab6Quad";
+            ColumnLab6Quad.ReadOnly = true;
+            // 
+            // tabPage7
+            // 
+            tabPage7.Controls.Add(richTextBox3);
+            tabPage7.Location = new Point(8, 46);
+            tabPage7.Name = "tabPage7";
+            tabPage7.Padding = new Padding(3);
+            tabPage7.Size = new Size(1454, 360);
+            tabPage7.TabIndex = 6;
+            tabPage7.Text = "LAB6 ПОЛИЗ";
+            tabPage7.UseVisualStyleBackColor = true;
+            // 
+            // richTextBox3
+            // 
+            richTextBox3.BackColor = SystemColors.ControlLightLight;
+            richTextBox3.Dock = DockStyle.Fill;
+            richTextBox3.Location = new Point(3, 3);
+            richTextBox3.Name = "richTextBox3";
+            richTextBox3.ReadOnly = true;
+            richTextBox3.Size = new Size(1448, 354);
+            richTextBox3.TabIndex = 0;
+            richTextBox3.Text = "";
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(13F, 32F);
@@ -784,6 +944,11 @@
             ((System.ComponentModel.ISupportInitialize)dataGridView4).EndInit();
             ((System.ComponentModel.ISupportInitialize)dataGridView3).EndInit();
             tabPage4.ResumeLayout(false);
+            tabPage5.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dataGridView5).EndInit();
+            tabPage6.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)dataGridView6).EndInit();
+            tabPage7.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -854,5 +1019,15 @@
         private DataGridViewButtonColumn ColumnSearch;
         private TabPage tabPage4;
         private RichTextBox richTextBox2;
+        private TabPage tabPage5;
+        private DataGridView dataGridView5;
+        private DataGridViewTextBoxColumn ColumnLab6ErrorFragment;
+        private DataGridViewTextBoxColumn ColumnLab6ErrorLocation;
+        private DataGridViewTextBoxColumn ColumnLab6ErrorDescription;
+        private TabPage tabPage6;
+        private DataGridView dataGridView6;
+        private DataGridViewTextBoxColumn ColumnLab6Quad;
+        private TabPage tabPage7;
+        private RichTextBox richTextBox3;
     }
 }
